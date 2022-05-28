@@ -3,9 +3,7 @@ package ru.job4j.grabber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -16,10 +14,10 @@ public class PsqlStore implements Store, AutoCloseable {
 
     public PsqlStore(Properties cfg) {
         try {
-            Class.forName(cfg.getProperty("driver-class-name"));
+            Class.forName(cfg.getProperty("jdbc.driver"));
             cnn = DriverManager.getConnection(
                 cfg.getProperty("url"),
-                cfg.getProperty("username"),
+                cfg.getProperty("login"),
                 cfg.getProperty("password")
             );
         } catch (Exception e) {
@@ -90,27 +88,6 @@ public class PsqlStore implements Store, AutoCloseable {
     public void close() throws Exception {
         if (cnn != null) {
             cnn.close();
-        }
-    }
-
-    public static void main(String[] args) {
-        Properties config = new Properties();
-        try (InputStream in = PsqlStore.class.getClassLoader().getResourceAsStream("rabbit.properties")) {
-            config.load(in);
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
-        }
-
-        Post post1 = new Post("testName1", "testLink1", "testText1", LocalDateTime.now());
-        Post post2 = new Post("testName2", "testLink2", "testText2", LocalDateTime.now());
-        try (PsqlStore psqlStore = new PsqlStore(config)) {
-            psqlStore.save(post1);
-            psqlStore.save(post2);
-            System.out.println(psqlStore.getAll());
-            System.out.println(psqlStore.findById(post1.getId()));
-            System.out.println(psqlStore.findById(post2.getId()));
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
         }
     }
 }
