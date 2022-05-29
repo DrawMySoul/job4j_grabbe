@@ -36,6 +36,7 @@ public class Grabber implements Grab {
         JobDataMap data = new JobDataMap();
         data.put("store", store);
         data.put("parse", parse);
+        data.put("link", cfg.getProperty("link"));
         JobDetail job = newJob(GrabJob.class)
             .usingJobData(data)
             .build();
@@ -56,7 +57,7 @@ public class Grabber implements Grab {
             JobDataMap map = context.getJobDetail().getJobDataMap();
             Store store = (Store) map.get("store");
             Parse parse = (Parse) map.get("parse");
-            parse.list("https://career.habr.com/vacancies/java_developer").forEach(store::save);
+            parse.list((String) map.get("link")).forEach(store::save);
         }
     }
 
